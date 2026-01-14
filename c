@@ -1,45 +1,56 @@
-import logging
-from typing import Dict, Any
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import Pinecone
-from langchain.prompts import ChatPromptTemplate
+"""
+SWARM ORCHESTRATOR
+Defines the interaction between specialized agents for Niche Content Production.
+"""
 
-class BrandVoiceEngine:
-    """
-    Engine for Brand Voice Synthesis (BVS).
-    Responsible for retrieving voice prints and applying them to generation tasks.
-    """
-    
-    def __init__(self, brand_id: str, vector_store: Any):
-        self.brand_id = brand_id
-        self.vector_store = vector_store
-        self.logger = logging.getLogger(__name__)
+from typing import List, TypedDict
+from langgraph.graph import StateGraph, END
 
-    async def get_brand_context(self) -> str:
-        """Retrieves stylometric traits and brand lexicon from the vector store."""
-        search_query = f"brand_traits_{self.brand_id}"
-        results = self.vector_store.similarity_search(search_query, k=3)
-        
-        context_str = "\n".join([res.page_content for res in results])
-        return context_str
+class SwarmState(TypedDict):
+    topic: str
+    brand_id: str
+    seo_data: dict
+    draft: str
+    review_score: float
+    iteration_count: int
 
-    async def generate_niche_content(self, topic: str, niche_data: Dict[str, Any]) -> str:
-        """Generates content using the BVS + SEO Semantic Gap integration."""
-        brand_context = await self.get_brand_context()
-        
-        system_template = """
-        You are an elite content strategist for a brand with the following identity:
-        {brand_context}
-        
-        Your task is to write high-ranking SEO content about {topic}.
-        Incorporate these semantic gaps to outperform competitors: {semantic_gaps}
-        
-        Maintain the brand's unique tone, vocabulary, and sentence structure strictly.
-        """
-        
-        prompt = ChatPromptTemplate.from_template(system_template)
-        # Logic to call LLM via LiteLLM or LangChain follows...
-        return f"Generated content for {topic} with BVS applied."
+def seo_researcher(state: SwarmState):
+    # Agent 1: Performs Deep SEO Analysis
+    print(f"--- RESEARCHING NICHE: {state['topic']} ---")
+    state['seo_data'] = {"keywords": ["niche A", "niche B"], "semantic_gaps": ["Gap 1"]}
+    return state
 
-# Example Usage:
-# engine = BrandVoiceEngine(brand_id="client_sme_01", vector_store=pinecone_instance)
+def voice_writer(state: SwarmState):
+    # Agent 2: Generates content using Brand Voice Synthesis
+    print(f"--- WRITING WITH BRAND VOICE: {state['brand_id']} ---")
+    state['draft'] = "Simulated high-quality niche content..."
+    return state
+
+def brand_critic(state: SwarmState):
+    # Agent 3: Quality Control for Brand Alignment
+    print("--- CRITIQUING BRAND ALIGNMENT ---")
+    state['review_score'] = 0.95 # Simulated score
+    state['iteration_count'] += 1
+    return state
+
+# Define the Graph
+workflow = StateGraph(SwarmState)
+
+workflow.add_node("researcher", seo_researcher)
+workflow.add_node("writer", voice_writer)
+workflow.add_node("critic", brand_critic)
+
+workflow.set_entry_point("researcher")
+workflow.add_edge("researcher", "writer")
+workflow.add_edge("writer", "critic")
+
+workflow.add_conditional_edges(
+    "critic",
+    lambda x: "end" if x["review_score"] > 0.8 or x["iteration_count"] > 2 else "writer",
+    {
+        "end": END,
+        "writer": "writer"
+    }
+)
+
+swarm_app = workflow.compile()

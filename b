@@ -1,34 +1,11 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1 import auth, content_gen # assumed structure
-
-app = FastAPI(
-    title="EchoNiche AI Backend",
-    version="1.0.0",
-    description="Next-gen MarTech API for Brand Voice Synthesis and Niche SEO."
-)
-
-# Set up CORS for Next.js frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], # Tighten for production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include Routers
-app.include_router(auth.router, prefix="/api/v1")
-# app.include_router(content_gen.router, prefix="/api/v1")
-
-@app.get("/")
-async def root():
-    return {
-        "status": "online",
-        "service": "EchoNiche-API",
-        "orchestrator_version": "v1.0-swarm"
-    }
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+fastapi==0.111.0
+uvicorn==0.29.0
+sqlalchemy==2.0.30
+psycopg2-binary==2.9.9
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+langchain==0.1.20
+langchain-openai==0.1.7
+pydantic==2.7.1
+python-dotenv==1.0.1

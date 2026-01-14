@@ -1,57 +1,34 @@
-from datetime import datetime, timedelta
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from passlib.context import CryptContext
-from pydantic import BaseModel
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.api.v1 import auth, content_gen # assumed structure
 
-# Configuration
-SECRET_KEY = "SUPER_SECRET_PROJECT_ECHONICHE_KEY" # Move to env
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 43200  # 30 days for MVP
+app = FastAPI(
+    title="EchoNiche AI Backend",
+    version="1.0.0",
+    description="Next-gen MarTech API for Brand Voice Synthesis and Niche SEO."
+)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
+# Set up CORS for Next.js frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Tighten for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+# Include Routers
+app.include_router(auth.router, prefix="/api/v1")
+# app.include_router(content_gen.router, prefix="/api/v1")
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "service": "EchoNiche-API",
+        "orchestrator_version": "v1.0-swarm"
+    }
 
-class User(BaseModel):
-    username: str
-    email: Optional[str] = None
-    role: str = "creator"
-
-def create_access_token(data: dict):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-@router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    # Logic to verify user against PostgreSQL 'users' table
-    # This is a placeholder for the verified identity logic
-    if not form_data.username == "admin": # Mock
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    
-    access_token = create_access_token(data={"sub": form_data.username, "role": "admin"})
-    return {"access_token": access_token, "token_type": "bearer"}
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
-    return User(username=username)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

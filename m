@@ -1,52 +1,18 @@
-# Fine-tuning script using QLoRA for efficient Niche Domain Adaptation
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, BitsAndBytesConfig
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-from datasets import load_dataset
+# ML Strategy: Niche Industry Fine-Tuning
 
-def run_niche_adaptation(model_id: str, dataset_path: str, output_dir: str):
-    # 1. Quantization Configuration (4-bit for SME-scale hardware)
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16
-    )
+## 1. Problem Statement
+Generic LLMs (GPT-4, Claude) often produce "hallucinated genericisms" when dealing with specific Thai niche markets (e.g., specific terms in the "Dropshipping" community or "Cosmetic Manufacturing" regulations).
 
-    # 2. Load Base Model (Optimized for Thai/English)
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=bnb_config, device_map="auto")
+## 2. Approach: Lexicon-Augmented Fine-Tuning
+We do not just fine-tune on text; we fine-tune on **Semantic Mappings**.
+- **Source:** The `lexicon` JSONB field in our PostgreSQL database.
+- **Process:** We generate synthetic contrastive pairs where a "Generic AI sentence" is corrected into a "Niche Professional sentence."
 
-    model = prepare_model_for_kbit_training(model)
+## 3. Key Metrics for Success
+1.  **Terminology Precision (TP):** Percentage of industry-specific terms used correctly vs. total industry terms required.
+2.  **Brand Voice Distance (BVD):** Cosine similarity between the generated content vector and the Brand's "Voice Print" vector stored in `pgvector`.
+3.  **SEO Keyword Integration:** Successful placement of LSI (Latent Semantic Indexing) keywords without breaking natural flow.
 
-    # 3. LoRA Configuration (Targeting niche vocabulary expansion)
-    lora_config = LoraConfig(
-        r=16,
-        lora_alpha=32,
-        target_modules=["q_proj", "v_proj", "k_proj", "o_proj"], # Fine-tune attention layers
-        lora_dropout=0.05,
-        bias="none",
-        task_type="CAUSAL_LM"
-    )
-
-    model = get_peft_model(model, lora_config)
-
-    # 4. Training Arguments
-    training_args = TrainingArguments(
-        output_dir=output_dir,
-        per_device_train_batch_size=4,
-        gradient_accumulation_steps=4,
-        learning_rate=2e-4,
-        num_train_epochs=3,
-        logging_steps=10,
-        push_to_hub=False,
-        report_to="none"
-    )
-
-    # 5. Trainer Initialization
-    # (Assuming data is pre-processed into 'train' and 'test' splits)
-    dataset = load_dataset("json", data_files=dataset_path, split="train")
-    
-    # Placeholder for actual training loop execution
-    print(f"Starting Niche Adaptation for {model_id} using {dataset_path}...")
-    # trainer.train()
+## 4. Model Selection
+*   **Base Model:** Open-source models like `Llama-3-8B` or `SeaLLM` (for Thai language proficiency).
+*   **Method:** QLoRA (Quantized Low-Rank Adaptation) to keep training costs low for the MarTech platform while maintaining high output quality.

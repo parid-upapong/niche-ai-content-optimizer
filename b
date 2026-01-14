@@ -1,68 +1,57 @@
-import os
-from typing import Dict, Any, Optional
-from uuid import UUID
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from sqlalchemy.orm import Session
-# Internal module imports (assumed paths based on architecture)
-# from app.db.models import BrandProfile, ContentLog
-# from app.services.seo_service import SEOAnalyst
+from datetime import datetime, timedelta
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from pydantic import BaseModel
 
-class AIOrchestrationService:
-    """
-    The Swarm Orchestrator: Coordinates between SEO Analysis, 
-    Brand Voice Synthesis, and Content Generation.
-    """
-    def __init__(self, db: Session):
-        self.db = db
-        self.llm = ChatOpenAI(
-            model="gpt-4-turbo-preview", 
-            temperature=0.7,
-            api_key=os.getenv("OPENAI_API_KEY")
-        )
+# Configuration
+SECRET_KEY = "SUPER_SECRET_PROJECT_ECHONICHE_KEY" # Move to env
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 43200  # 30 days for MVP
 
-    async def generate_niche_content(
-        self, 
-        brand_id: UUID, 
-        seed_keyword: str, 
-        target_audience: str
-    ) -> Dict[str, Any]:
-        # 1. Fetch Brand DNA (BVS Core)
-        # brand = self.db.query(BrandProfile).filter(BrandProfile.id == brand_id).first()
-        brand_voice_context = {
-            "tone": "Professional yet empathetic", # Mocked from DB
-            "lexicon": ["innovation", "SME empowerment", "precision"],
-            "avoid_terms": ["generic", "cheap", "standard"]
-        }
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
-        # 2. Step 1: SEO Semantic Mapping (Agent SEO)
-        seo_brief = await self._run_seo_analysis(seed_keyword, target_audience)
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-        # 3. Step 2: Content Generation with Brand Voice Synthesis
-        content = await self._generate_branded_copy(brand_voice_context, seo_brief)
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-        return {
-            "seo_brief": seo_brief,
-            "generated_content": content,
-            "metadata": {"brand_id": str(brand_id), "engine": "EchoNiche-v1"}
-        }
+class User(BaseModel):
+    username: str
+    email: Optional[str] = None
+    role: str = "creator"
 
-    async def _run_seo_analysis(self, keyword: str, audience: str) -> str:
-        # Implementation of the SEO Strategist Agent Logic
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are a Senior SEO Strategist specializing in Niche Market Dominance."),
-            ("user", "Create a semantic brief for keyword: {keyword} targeting {audience}")
-        ])
-        chain = prompt | self.llm
-        response = await chain.ainvoke({"keyword": keyword, "audience": audience})
-        return response.content
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-    async def _generate_branded_copy(self, voice_context: Dict, seo_brief: str) -> str:
-        # Implementation of the Content Writer (The Voice Artisan)
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are the Voice Artisan. Use the following Brand DNA: {context}"),
-            ("user", "Write an authoritative article based on this SEO brief: {brief}")
-        ])
-        chain = prompt | self.llm
-        response = await chain.ainvoke({"context": str(voice_context), "brief": seo_brief})
-        return response.content
+@router.post("/login", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    # Logic to verify user against PostgreSQL 'users' table
+    # This is a placeholder for the verified identity logic
+    if not form_data.username == "admin": # Mock
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    
+    access_token = create_access_token(data={"sub": form_data.username, "role": "admin"})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    return User(username=username)

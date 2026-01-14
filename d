@@ -1,27 +1,35 @@
-# Deep SEO & Semantic Mapping: Beyond Keywords
-**Signature:** doc-01 | Documenter
+# Multi-stage Dockerfile for EchoNiche AI Backend
+# Stage 1: Build
+FROM python:3.11-slim as builder
 
-EchoNiche doesn't just "stuff" keywords. It builds **Topical Authority**. Use this guide to understand how our SEO Analyst Agent works.
+WORKDIR /app
 
-## 1. Keyword vs. Intent
-Standard tools look for "Search Volume." EchoNiche looks for **"Intent Gaps."** 
-- **Informational Intent:** "What is Brand Synthesis?"
-- **Transactional Intent:** "Best AI MarTech for SMEs."
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-## 2. The Semantic Map
-When you enter a keyword, the system generates a **Cluster Map**. 
-- **Core Topic:** Your main keyword.
-- **LSI (Latent Semantic Indexing):** Related terms Google expects to see.
-- **Information Gain:** Unique sub-topics that *your* competitors are missing.
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
 
-## 3. Utilizing "Information Gain"
-To rank #1, you must provide value that doesn't exist elsewhere. Our AI will suggest "Value Add" sections, such as:
-- Proprietary Case Studies.
-- Unique Thai market insights.
-- Contrarian viewpoints to standard industry advice.
+# Stage 2: Production
+FROM python:3.11-slim as runner
 
-## 4. Technical SEO Guardrails
-Every post generated is pre-optimized for:
-- **Schema Markup:** Automatic JSON-LD generation.
-- **Header Hierarchy:** Logical H1 -> H2 -> H3 flow for crawlability.
-- **Internal Linking:** Suggestions for connecting to your existing Brand Profile assets.
+WORKDIR /app
+
+# Copy only the necessary files from builder
+COPY --from=builder /root/.local /root/.local
+COPY ./app ./app
+
+# Ensure scripts in .local are usable
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONPATH=/app
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Healthcheck for orchestration stability
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

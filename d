@@ -1,36 +1,19 @@
-version: '3.8'
+# EchoNiche AI: Database Design & Rationale (v1.0)
+**Signature:** db-arch | DB Architect
 
-services:
-  api_gateway:
-    build: ./core
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://user:pass@db:5432/echoniche
-      - REDIS_URL=redis://redis:6379/0
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    depends_on:
-      - db
-      - redis
+## 1. Overview
+The database is designed to handle multi-tenant brand identities, complex SEO semantic relationships, and a high-frequency content generation log. We use **PostgreSQL** with **pgvector** to support the RAG (Retrieval-Augmented Generation) requirements for Brand Voice consistency.
 
-  worker:
-    build: ./core
-    command: celery -A tasks worker --loglevel=info
-    environment:
-      - DATABASE_URL=postgresql://user:pass@db:5432/echoniche
-    depends_on:
-      - redis
+## 2. Key Modules
+### 2.1 Brand Identity & Voice Print
+Stores the "DNA" of the brand. Instead of simple text descriptions, we use structured `tone_attributes` and a `lexicon` (JSONB) to allow the AI to modulate its output.
 
-  db:
-    image: ankane/pgvector:latest # PostgreSQL with Vector support
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: echoniche
-    ports:
-      - "5432:5432"
+### 2.2 Niche Semantic SEO
+Moves beyond flat keywords. The schema supports **Clusters** and **Intent Mapping**, allowing the AI to understand *why* a user is searching, not just *what* they are searching for.
 
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
+### 2.3 Content Lifecycle & Feedback
+Logs every generation. Critically, it includes `feedback_loops` (rating, edits) which are essential for Phase 1's Brand Voice Synthesis refinement.
+
+## 3. Performance Considerations
+*   **Indexing:** B-Tree for standard lookups; GIN for JSONB brand attributes; HNSW/IVFFlat for vector embeddings.
+*   **Versioning:** Content logs use a `parent_id` structure to track iterations and AI refinements.

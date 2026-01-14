@@ -1,65 +1,52 @@
 import React from 'react';
-import { LayoutDashboard, PenTool, Search, Settings, BarChart3, Users } from 'lucide-react';
+import { Sparkles, Zap, BrainCircuit } from 'lucide-react';
 
-interface SidebarItemProps {
-  icon: React.ElementType;
-  label: string;
-  active?: boolean;
+interface VoicePrintProps {
+  brandName: string;
+  tone: string[];
+  resonance: number;
 }
 
-const SidebarItem = ({ icon: Icon, label, active }: SidebarItemProps) => (
-  <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
-    active ? 'bg-brand-primary text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-  }`}>
-    <Icon size={20} />
-    <span className="font-medium">{label}</span>
-  </div>
-);
-
-export default function DashboardShell({ children }: { children: React.ReactNode }) {
+export const VoicePrintCard = ({ brandName, tone, resonance }: VoicePrintProps) => {
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-50 overflow-hidden font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-slate-800 flex flex-col p-6 space-y-8 shrink-0">
-        <div className="flex items-center space-x-2 px-2">
-          <div className="w-8 h-8 rounded-lg bvs-gradient flex items-center justify-center font-bold">E</div>
-          <span className="text-xl font-bold tracking-tight">EchoNiche <span className="text-brand-secondary">AI</span></span>
+    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h3 className="text-lg font-bold text-slate-900">{brandName} Voice Print</h3>
+          <p className="text-sm text-slate-500">Active BVS Engine: v1.0.2</p>
         </div>
-        
-        <nav className="flex-1 space-y-2">
-          <SidebarItem icon={LayoutDashboard} label="Overview" active />
-          <SidebarItem icon={PenTool} label="Content Lab" />
-          <SidebarItem icon={Search} label="SEO Architect" />
-          <SidebarItem icon={Users} label="Brand Voice DNA" />
-          <SidebarItem icon={BarChart3} label="Analytics" />
-        </nav>
-
-        <div className="pt-6 border-t border-slate-800">
-          <SidebarItem icon={Settings} label="Settings" />
+        <div className="p-2 bg-indigo-50 rounded-lg">
+          <BrainCircuit className="text-brand-primary" size={24} />
         </div>
-      </aside>
+      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-slate-50 text-slate-900 overflow-hidden">
-        <header className="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-8 shrink-0">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Workspace / Project Echo-Niche</h2>
-          <div className="flex items-center space-x-4">
-            <div className="flex -space-x-2">
-              <div className="w-8 h-8 rounded-full border-2 border-white bg-indigo-500" />
-              <div className="w-8 h-8 rounded-full border-2 border-white bg-pink-500" />
-            </div>
-            <button className="bg-slate-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition-opacity">
-              Generate New
-            </button>
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          {tone.map((t) => (
+            <span key={t} className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 uppercase tracking-wider">
+              {t}
+            </span>
+          ))}
+        </div>
+
+        <div className="pt-4 space-y-2">
+          <div className="flex justify-between text-sm mb-1">
+            <span className="text-slate-600 font-medium">Brand Resonance Score</span>
+            <span className="text-indigo-600 font-bold">{resonance}%</span>
           </div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-7xl mx-auto space-y-8">
-            {children}
+          <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bvs-gradient transition-all duration-1000" 
+              style={{ width: `${resonance}%` }}
+            />
           </div>
         </div>
-      </main>
+      </div>
+
+      <div className="mt-6 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <div className="flex items-center gap-1"><Zap size={10} className="text-amber-500" /> Niche Optimized</div>
+        <div className="flex items-center gap-1"><Sparkles size={10} className="text-pink-500" /> Humanized Output</div>
+      </div>
     </div>
   );
-}
+};

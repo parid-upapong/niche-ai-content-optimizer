@@ -1,18 +1,26 @@
-# Welcome to EchoNiche AI: Your Niche Market Dominance Manual
-**Project:** Project Echo-Niche
-**Version:** 1.0.0
+# Configuring Your "Brand DNA" (BVS Guide)
+**Signature:** doc-01 | Documenter
 
-## 1. The EchoNiche Philosophy
-Traditional AI content tools produce generic, "gray" text. EchoNiche is different. We focus on **Brand Voice Synthesis (BVS)**—the art of capturing your brand's unique soul—and **Semantic SEO**, which ensures you don't just rank for keywords, but you own the entire topical niche.
+The secret to EchoNiche's superior output is the **Brand Voice Profile**. This document explains how to configure the BVS engine for maximum accuracy.
 
-## 2. The Core Workflow
-To get the most out of EchoNiche, follow the **"3-S Master Flow"**:
-1.  **Synthesize (Brand Profile):** Define your Brand DNA, Lexicon, and Tone.
-2.  **Strategize (SEO Architect):** Map out "Information Gain" opportunities in your niche.
-3.  **Scale (Content Artisan):** Generate and refine content that sounds like you, not a robot.
+## 1. Understanding Tone Attributes
+We use a 5-dimensional scale to map your voice:
+*   **Formality:** (Casual ↔ Professional)
+*   **Energy:** (Calm ↔ Enthusiastic)
+*   **Perspective:** (First-person "I/We" ↔ Third-person authoritative)
+*   **Directness:** (Story-driven ↔ Bullet-point efficiency)
+*   **Empathy:** (Data-driven ↔ Human-centric)
 
-## 3. Quick Start Checklist
-*   [ ] **Create your Brand Profile:** Visit the 'Brand Lab' to upload your existing assets.
-*   [ ] **Run a Niche Scan:** Enter a seed keyword to see the Semantic Map.
-*   [ ] **Set your Lexicon:** Define the "Forbidden Words" and "Signature Phrases" unique to your industry.
-*   [ ] **Generate first draft:** Use the Interactive Editor to see real-time Brand Voice scoring.
+## 2. Building the Lexicon (The "Soul" of Language)
+In the Brand Lab, you can define:
+*   **Signature Phrases:** Words you use often (e.g., "Revolutionizing the way...", "Let's dive deep...").
+*   **Niche Jargon:** Specialized Thai/English terms specific to your industry (e.g., MarTech jargon, legal terminology).
+*   **Exclusion List:** Words the AI must *never* use (e.g., avoiding the word "Transformative" if it feels overused in your niche).
+
+## 3. Training the Engine with Samples
+Upload 3-5 examples of your best-performing past content. Our BVS engine will perform a **Feature Extraction** to automatically identify your unique cadence and sentence structure patterns.
+
+## 4. Voice Consistency Score
+As you edit in the dashboard, you will see a **Voice Alignment Score (0-100%)**. 
+*   **90%+: Perfect.** The AI has successfully mimicked your Brand DNA.
+*   **<70%: Calibration Required.** Check if your Lexicon is too restrictive or if the SEO goals are conflicting with your brand tone.

@@ -1,35 +1,36 @@
-# Multi-stage Dockerfile for EchoNiche AI Backend
-# Stage 1: Build
-FROM python:3.11-slim as builder
+version: '3.8'
 
-WORKDIR /app
+services:
+  api_gateway:
+    build: ./core
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/echoniche
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - db
+      - redis
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+  worker:
+    build: ./core
+    command: celery -A tasks worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/echoniche
+    depends_on:
+      - redis
 
-COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
+  db:
+    image: ankane/pgvector:latest # PostgreSQL with Vector support
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: echoniche
+    ports:
+      - "5432:5432"
 
-# Stage 2: Production
-FROM python:3.11-slim as runner
-
-WORKDIR /app
-
-# Copy only the necessary files from builder
-COPY --from=builder /root/.local /root/.local
-COPY ./app ./app
-
-# Ensure scripts in .local are usable
-ENV PATH=/root/.local/bin:$PATH
-ENV PYTHONPATH=/app
-
-# Expose FastAPI port
-EXPOSE 8000
-
-# Healthcheck for orchestration stability
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"

@@ -1,15 +1,34 @@
-{
-  "content_writer": {
-    "system_instruction": "You are the 'Voice Artisan' for EchoNiche AI. Your task is to write content that feels indistinguishable from a human expert in the {niche} field. You must strictly adhere to the following Brand DNA: {brand_dna}. Do not use generic AI filler words like 'delve', 'embark', or 'unleash' unless they are part of the brand's specific lexicon. Focus on deep value and emotional resonance.",
-    "bvs_check_template": "Compare the following draft against the Brand Profile: {brand_profile}. Rate the tone consistency from 1-10 and list any deviations."
-  },
-  "seo_analyst": {
-    "system_instruction": "You are the 'Semantic Strategist' for EchoNiche AI. Your goal is to dominate the {niche} by mapping intent. Do not just provide a list of keywords. Provide a 'Semantic Web' of connected concepts. Identify the 'Underground' keywords that competitors are missing but high-intent users are searching for.",
-    "brief_format": {
-      "primary_keyword": "string",
-      "semantic_entities": ["list"],
-      "intent_category": "string",
-      "suggested_outline": "markdown"
-    }
-  }
-}
+# EchoNiche AI: System Architecture & AI Integration Patterns (v1.0)
+**Signature:** arch-01 | ARCHITECT (CTO)
+
+## 1. High-Level Architecture Overview
+The system follows a **Decoupled Agentic Microservices** architecture. This ensures that the Brand Voice Synthesis (BVS) and Deep SEO modules can scale independently while being orchestrated by a central "Brain" (The Swarm Orchestrator).
+
+### 1.1 Tech Stack
+*   **Frontend:** Next.js 14 (App Router) + Tailwind CSS + Radix UI.
+*   **API Gateway:** FastAPI (Python) - High performance for AI/ML tasks.
+*   **Orchestration:** LangGraph / Temporal.io (for long-running content workflows).
+*   **Primary Database:** PostgreSQL (with pgvector for hybrid search).
+*   **Vector Store:** Pinecone or Weaviate (Storage for "Voice Prints" and Niche Semantics).
+*   **Cache/Queue:** Redis + BullMQ.
+*   **LLM Interface:** LiteLLM (to abstract OpenAI, Anthropic, and Local Llama-3 models).
+
+## 2. Core AI Integration Patterns
+
+### 2.1 Brand Voice Synthesis (BVS) Workflow
+Instead of simple prompting, EchoNiche uses a **RAG-Enhanced Stylometric Injection** pattern:
+1.  **Ingestion:** Analyze user-uploaded assets (PDFs, URLs, past posts).
+2.  **Extraction:** Extract stylometric features (Sentence length variance, sentiment bias, lexicon frequency).
+3.  **Vectorization:** Store these "Voice Prints" in a vector DB.
+4.  **Generation:** At runtime, the system retrieves the Voice Print and injects it as a "System Persona" constraint via a Dynamic Prompt Template.
+
+### 2.2 Deep SEO Semantic Engine
+We move beyond keyword density to **Semantic Gap Analysis**:
+*   **Agent A (Researcher):** Scrapes top 10 SERP results and extracts "Entities" and "Topic Clusters" using NLP.
+*   **Agent B (Analyzer):** Identifies missing semantic links (LSI keywords) that the competitors missed.
+*   **Agent C (Writer):** Integrates these gaps into the content naturally while maintaining the BVS.
+
+## 3. Scalability Strategy
+*   **Horizontal Pod Autoscaling (HPA):** Based on GPU/CPU utilization for LLM processing nodes.
+*   **Asynchronous Processing:** All content generation is handled via workers; the UI uses WebSockets for real-time status updates.
+*   **Multi-Tenant Data Isolation:** Row-Level Security (RLS) in PostgreSQL to ensure brand data privacy.

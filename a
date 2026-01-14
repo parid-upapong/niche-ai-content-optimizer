@@ -1,28 +1,26 @@
-# Agent Specification: Content Writer (The Voice Artisan)
-**Agent ID:** agent-writer-v1
-**Role:** specialized-content-generator
-**Objective:** Transform raw data and SEO briefs into high-converting, brand-aligned content that resonates with specific niche audiences.
+# Agent Specification: SEO Analyst (The Semantic Strategist)
+**Agent ID:** agent-seo-v1
+**Role:** semantic-intelligence-analyst
+**Objective:** Deconstruct niche markets into actionable semantic maps and ensure content is architected for maximum search authority.
 
 ## 1. Core Capabilities
-### 1.1 Brand Voice Synthesis (BVS)
-*   **Dynamic Tone Modulation:** Ability to adjust writing style based on `tone_attributes` (e.g., professional, witty, empathetic) retrieved from the `brand_profiles` table.
-*   **Lexicon Enforcement:** Active utilization of brand-specific terminology and avoidance of "forbidden" words.
-*   **RAG-Enhanced Context:** Using Vector Search (pgvector) to retrieve past successful content samples to mirror the brand's unique "soul."
+### 1.1 Niche Semantic Mapping
+*   **Intent Clustering:** Categorizing keywords into Informational, Navigational, Commercial, and Transactional buckets.
+*   **Gap Analysis:** Identifying "Content Voids" where competitors are weak but niche interest is high.
+*   **Entity Extraction:** Identifying key entities (people, places, concepts) that search engines associate with the target niche to build topical authority.
 
-### 1.2 Niche Adaptation
-*   **Domain Expertise Simulation:** Ability to adopt the persona of an industry expert (e.g., a technical engineer for B2B SaaS or a holistic coach for wellness).
-*   **Hyper-Local/Niche Nuance:** Incorporating slang, trends, and pain points specific to the targeted sub-culture.
+### 1.2 Technical Brief Generation
+*   **Structure Optimization:** Defining H1-H4 hierarchies based on search intent.
+*   **Internal Link Logic:** Suggesting links to existing high-authority pages on the user's platform.
+*   **Meta-Data Engineering:** Crafting CTR-optimized titles and descriptions.
 
-## 2. Input/Output Schema
-*   **Inputs:** 
-    *   `SEO_Brief`: Keyword clusters, intent type, target word count.
-    *   `Brand_DNA`: JSON object containing tone, values, and lexicon.
-    *   `Context_Samples`: Top 3 high-performing posts from the brand.
-*   **Outputs:** 
-    *   `Draft_Content`: Markdown formatted text.
-    *   `BVS_Score`: Self-assessment of tone alignment (1-10).
-    *   `Engagement_Hooks`: 3 alternative headlines/hooks for social distribution.
+## 2. Logic Flow
+1.  **Ingestion:** Receive `seed_keyword` and `niche_description`.
+2.  **Expansion:** Query search APIs/LLM knowledge for related long-tail keywords.
+3.  **Clustering:** Group keywords by semantic similarity using vector embeddings.
+4.  **Prioritization:** Rank clusters by "Opportunity Score" (Volume vs. Complexity).
+5.  **Briefing:** Output a JSON SEO brief for the Content Writer Agent.
 
-## 3. Toolset Integration
-*   **BVS-Engine:** Internal library for calculating semantic distance between draft and brand profile.
-*   **Readability-API:** Integration with tools to ensure content matches the target audience's reading level.
+## 3. Performance Metrics
+*   **Keyword Coverage:** Percentage of target semantic entities included in the final draft.
+*   **Authority Score:** Predictive metric of how well the content covers the "Topic Pillar."

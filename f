@@ -1,55 +1,75 @@
-import React from 'react';
-import { Target, Search, ArrowUpRight } from 'lucide-react';
+import DashboardShell from '@/components/layout/DashboardShell';
+import { VoicePrintCard } from '@/components/ui/VoicePrintCard';
+import { SEOInsightsSidebar } from '@/components/ui/SEOInsightsSidebar';
 
-interface KeywordMetric {
-  term: string;
-  relevance: number;
-  difficulty: 'Low' | 'Medium' | 'High';
-}
+export default function DashboardPage() {
+  const mockKeywords = [
+    { term: 'Organic Growth Hacks 2024', relevance: 98, difficulty: 'Medium' as const },
+    { term: 'Niche Community Building', relevance: 85, difficulty: 'Low' as const },
+    { term: 'AI Marketing ROI', relevance: 72, difficulty: 'High' as const },
+  ];
 
-export const SEOInsightsSidebar = ({ keywords }: { keywords: KeywordMetric[] }) => {
   return (
-    <div className="w-80 border-l border-slate-200 bg-white p-6 shrink-0 hidden xl:block">
-      <div className="flex items-center space-x-2 mb-8">
-        <Target className="text-emerald-500" size={20} />
-        <h3 className="font-bold text-slate-900 tracking-tight">Semantic SEO Brief</h3>
-      </div>
+    <DashboardShell>
+      <div className="flex gap-8">
+        <div className="flex-1 space-y-8">
+          <header>
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Brand Command Center</h1>
+            <p className="text-slate-500 mt-2">Manage your Brand Voice Synthesis (BVS) and SEO orchestration.</p>
+          </header>
 
-      <div className="space-y-6">
-        <section>
-          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">Topical Authority Gaps</label>
-          <div className="space-y-3">
-            {keywords.map((kw, i) => (
-              <div key={i} className="group cursor-pointer p-3 rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50 transition-all">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-semibold text-slate-700">{kw.term}</span>
-                  <ArrowUpRight size={14} className="text-slate-300 group-hover:text-brand-primary" />
-                </div>
-                <div className="flex items-center space-x-3 text-[10px]">
-                  <span className="text-emerald-600 font-bold">{kw.relevance}% Rel.</span>
-                  <span className={`px-1.5 py-0.5 rounded ${
-                    kw.difficulty === 'Low' ? 'bg-green-100 text-green-700' : 
-                    kw.difficulty === 'Medium' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {kw.difficulty} Diff
-                  </span>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <VoicePrintCard 
+              brandName="EchoNiche Pro" 
+              tone={['Professional', 'Futuristic', 'Empathetic']} 
+              resonance={92} 
+            />
+            {/* Additional Brand Cards for Multi-tenant support */}
+            <div className="border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 text-slate-400 hover:border-brand-primary hover:text-brand-primary cursor-pointer transition-colors group">
+              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-2 group-hover:bg-indigo-50 transition-colors">
+                <span className="text-2xl">+</span>
               </div>
-            ))}
+              <span className="text-sm font-semibold">New Brand Identity</span>
+            </div>
           </div>
-        </section>
 
-        <section className="p-4 bg-slate-900 rounded-2xl text-white">
-          <div className="flex items-center space-x-2 mb-3">
-            <Search size={16} className="text-indigo-400" />
-            <span className="text-xs font-bold uppercase tracking-wider">Search Intent</span>
+          <div className="bg-white rounded-2xl border border-slate-200 p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-xl">Recent Content Intelligence</h3>
+              <button className="text-brand-primary text-sm font-bold hover:underline">View All Logs</button>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="pb-4 font-bold text-slate-400 text-xs uppercase tracking-widest">Article Title</th>
+                    <th className="pb-4 font-bold text-slate-400 text-xs uppercase tracking-widest">BVS Match</th>
+                    <th className="pb-4 font-bold text-slate-400 text-xs uppercase tracking-widest">SEO Score</th>
+                    <th className="pb-4 font-bold text-slate-400 text-xs uppercase tracking-widest">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  <tr className="border-b border-slate-50">
+                    <td className="py-4 font-medium">How AI Redefines Niche Marketing in 2024</td>
+                    <td className="py-4"><span className="text-emerald-500 font-bold">95%</span></td>
+                    <td className="py-4"><span className="text-indigo-500 font-bold">88/100</span></td>
+                    <td className="py-4"><span className="px-2 py-1 bg-green-100 text-green-700 rounded text-[10px] font-bold uppercase">Published</span></td>
+                  </tr>
+                  <tr className="border-b border-slate-50">
+                    <td className="py-4 font-medium">The Silent Power of Brand Lexicons</td>
+                    <td className="py-4"><span className="text-amber-500 font-bold">82%</span></td>
+                    <td className="py-4"><span className="text-indigo-500 font-bold">92/100</span></td>
+                    <td className="py-4"><span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-[10px] font-bold uppercase">Drafting</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            The audience is searching for <span className="text-white italic">"High ROI Niche Markets"</span> with an <span className="text-indigo-300 underline underline-offset-4 font-medium">Informational Intent</span>. 
-            Prioritize data-backed case studies.
-          </p>
-        </section>
+        </div>
+
+        <SEOInsightsSidebar keywords={mockKeywords} />
       </div>
-    </div>
+    </DashboardShell>
   );
-};
+}

@@ -1,18 +1,37 @@
-# ML Strategy: Niche Industry Fine-Tuning
+import json
+import pandas as pd
+from typing import List, Dict
 
-## 1. Problem Statement
-Generic LLMs (GPT-4, Claude) often produce "hallucinated genericisms" when dealing with specific Thai niche markets (e.g., specific terms in the "Dropshipping" community or "Cosmetic Manufacturing" regulations).
+class NicheDatasetGenerator:
+    """
+    Transforms Brand Lexicons and Niche Semantic Maps into instruction-tuning 
+    datasets (JSONL) for domain adaptation.
+    """
+    def __init__(self, brand_id: str, industry_niche: str):
+        self.brand_id = brand_id
+        self.industry_niche = industry_niche
 
-## 2. Approach: Lexicon-Augmented Fine-Tuning
-We do not just fine-tune on text; we fine-tune on **Semantic Mappings**.
-- **Source:** The `lexicon` JSONB field in our PostgreSQL database.
-- **Process:** We generate synthetic contrastive pairs where a "Generic AI sentence" is corrected into a "Niche Professional sentence."
+    def format_for_instruction_tuning(self, raw_data: List[Dict]) -> List[Dict]:
+        """
+        Converts raw niche terminology into (Instruction, Input, Output) format.
+        Focuses on 'Niche Terminology Correctness' and 'Brand Voice Alignment'.
+        """
+        formatted_data = []
+        for entry in raw_data:
+            template = {
+                "instruction": f"Rewrite the following content using {self.industry_niche} industry terminology and the specific brand voice of {self.brand_id}.",
+                "input": entry.get("generic_text"),
+                "output": entry.get("niche_optimized_text")
+            }
+            formatted_data.append(template)
+        return formatted_data
 
-## 3. Key Metrics for Success
-1.  **Terminology Precision (TP):** Percentage of industry-specific terms used correctly vs. total industry terms required.
-2.  **Brand Voice Distance (BVD):** Cosine similarity between the generated content vector and the Brand's "Voice Print" vector stored in `pgvector`.
-3.  **SEO Keyword Integration:** Successful placement of LSI (Latent Semantic Indexing) keywords without breaking natural flow.
+    def save_to_jsonl(self, data: List[Dict], filename: str):
+        with open(filename, 'w', encoding='utf-8') as f:
+            for entry in data:
+                f.write(json.dumps(entry, ensure_ascii=False) + '\n')
 
-## 4. Model Selection
-*   **Base Model:** Open-source models like `Llama-3-8B` or `SeaLLM` (for Thai language proficiency).
-*   **Method:** QLoRA (Quantized Low-Rank Adaptation) to keep training costs low for the MarTech platform while maintaining high output quality.
+# Example Usage:
+# processor = NicheDatasetGenerator("EchoNiche_SME_Thai", "E-commerce Logistics")
+# raw_samples = [{"generic_text": "ส่งของไวมาก", "niche_optimized_text": "ยกระดับ Last-mile delivery ด้วยความรวดเร็วระดับพรีเมียม"}]
+# processor.save_to_jsonl(processor.format_for_instruction_tuning(raw_samples), "train_niche_v1.jsonl")
